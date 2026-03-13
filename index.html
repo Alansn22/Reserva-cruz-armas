@@ -217,7 +217,7 @@
 
   <div class="avatar-section">
     <div class="avatar-video">
-      <video controls playsinline poster="fachada.jpg"
+      <video controls autoplay muted playsinline
         src="https://alansn22.github.io/Reserva-cruz-armas/video.mp4">
         Seu navegador não suporta vídeo HTML5.
       </video>
@@ -228,7 +228,7 @@
     <h3>Explore o empreendimento</h3>
     <div class="menu-grid">
 
-      <a class="menu-btn destaque btn-tabela" onclick="abrirTela('tela-tabela')">
+      <a class="menu-btn destaque btn-tabela" href="javascript:void(0)" onclick="abrirTela('tela-tabela')">
         <div class="menu-btn-icon">🏠</div>
         <div>
           <div class="menu-btn-label">Tabela de Vendas</div>
@@ -236,25 +236,25 @@
         </div>
       </a>
 
-      <a class="menu-btn btn-book" onclick="abrirTela('tela-book')">
+      <a class="menu-btn btn-book" href="javascript:void(0)" onclick="abrirTela('tela-book')">
         <div class="menu-btn-icon">📖</div>
         <div class="menu-btn-label">Book</div>
         <div class="menu-btn-desc">Fotos e renders</div>
       </a>
 
-      <a class="menu-btn btn-material" onclick="abrirTela('tela-material')">
+      <a class="menu-btn btn-material" href="javascript:void(0)" onclick="abrirTela('tela-material')">
         <div class="menu-btn-icon">📢</div>
         <div class="menu-btn-label">Divulgação</div>
         <div class="menu-btn-desc">Material de marketing</div>
       </a>
 
-      <a class="menu-btn btn-local" onclick="abrirTela('tela-local')">
+      <a class="menu-btn btn-local" href="javascript:void(0)" onclick="abrirTela('tela-local')">
         <div class="menu-btn-icon">📍</div>
         <div class="menu-btn-label">Localização</div>
         <div class="menu-btn-desc">Como chegar</div>
       </a>
 
-      <a class="menu-btn destaque btn-contato" onclick="abrirTela('tela-contato')">
+      <a class="menu-btn destaque btn-contato" href="javascript:void(0)" onclick="abrirTela('tela-contato')">
         <div class="menu-btn-icon">💬</div>
         <div>
           <div class="menu-btn-label">Fale Conosco</div>
@@ -359,11 +359,12 @@
   </div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
   const TABELA_URL = 'https://alansn22.github.io/Reserva-cruz-armas/tabela.html';
 
   function abrirTela(id) {
     document.getElementById('tela-menu').style.display = 'none';
+    document.querySelectorAll('.tela').forEach(t => t.style.display = 'none');
     const tela = document.getElementById(id);
     tela.style.display = 'flex';
     if (id === 'tela-tabela') {
@@ -372,3 +373,14 @@
         iframe.src = TABELA_URL;
       }
     }
+    window.scrollTo(0, 0);
+  }
+
+  function voltarMenu() {
+    document.querySelectorAll('.tela').forEach(t => t.style.display = 'none');
+    document.getElementById('tela-menu').style.display = 'flex';
+    window.scrollTo(0, 0);
+  }
+</script>
+</body>
+</html>
