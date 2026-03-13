@@ -51,26 +51,14 @@
     background:#111; padding:24px 20px; text-align:center;
     border-bottom:1px solid #222;
   }
-  .avatar-placeholder {
+  .avatar-video {
     width:100%; max-width:480px; margin:0 auto;
-    aspect-ratio:16/9; background:#1a1a1a;
-    border:2px dashed #c8a96e44;
+    aspect-ratio:16/9; border-radius:12px;
+    overflow:hidden; background:#000;
+  }
+  .avatar-video video {
+    width:100%; height:100%; object-fit:cover;
     border-radius:12px;
-    display:flex; flex-direction:column;
-    align-items:center; justify-content:center; gap:10px;
-    cursor:pointer;
-  }
-  .avatar-icon {
-    width:56px; height:56px; border-radius:50%;
-    background:#c8a96e22; border:2px solid #c8a96e66;
-    display:flex; align-items:center; justify-content:center;
-    font-size:24px;
-  }
-  .avatar-placeholder p {
-    font-size:13px; color:#c8a96e; font-weight:500;
-  }
-  .avatar-placeholder span {
-    font-size:11px; color:#666;
   }
 
   /* MENU BOTOES */
@@ -228,10 +216,11 @@
   </div>
 
   <div class="avatar-section">
-    <div class="avatar-placeholder" onclick="alert('Em breve: vídeo apresentação com avatar do empreendimento!')">
-      <div class="avatar-icon">🎬</div>
-      <p>Vídeo Apresentação</p>
-      <span>Em breve — avatar explicando o empreendimento</span>
+    <div class="avatar-video">
+      <video controls playsinline poster="fachada.jpg"
+        src="https://alansn22.github.io/Reserva-cruz-armas/video.mp4">
+        Seu navegador não suporta vídeo HTML5.
+      </video>
     </div>
   </div>
 
@@ -356,11 +345,11 @@
         <p>(83) 99616-5800</p>
       </div>
     </a>
-    <a class="contato-card" href="mailto:an1construcoes@hotmail.com">
+    <a class="contato-card" href="/cdn-cgi/l/email-protection#fc9d92cd9f93928f888e899f93998fbc949388919d9590d29f9391">
       <div class="contato-card-icon email">✉️</div>
       <div>
         <h4>E-mail</h4>
-        <p>an1construcoes@hotmail.com</p>
+        <p><span class="__cf_email__" data-cfemail="593837683a36372a2d2b2c3a363c2a1931362d34383035773a3634">[email&#160;protected]</span></p>
       </div>
     </a>
     <div class="contato-info">
@@ -370,7 +359,7 @@
   </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
   const TABELA_URL = 'https://alansn22.github.io/Reserva-cruz-armas/tabela.html';
 
   function abrirTela(id) {
@@ -383,15 +372,3 @@
         iframe.src = TABELA_URL;
       }
     }
-    window.scrollTo(0,0);
-  }
-
-  function voltarMenu() {
-    document.querySelectorAll('.tela').forEach(t => t.style.display = 'none');
-    document.getElementById('tela-menu').style.display = 'flex';
-    window.scrollTo(0,0);
-  }
-</script>
-
-</body>
-</html>
