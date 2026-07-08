@@ -640,7 +640,13 @@ function initFirebase(){
 
     // Listener CORRETORES
     refCORR.on('value', snap => {
-      CORRETORES = snap.val() || {};
+      const val = snap.val();
+      // Garantir que é um objeto válido com registros de corretor
+      if(val && typeof val === 'object'){
+        CORRETORES = val;
+      } else {
+        CORRETORES = {};
+      }
       if(isAdmin) checkPendentesCorretor();
     });
 
@@ -1166,22 +1172,49 @@ function doCadastroCorretor(){
   if(!email||!email.includes('@')){errEl.textContent='E-mail inválido.';errEl.style.display='block';return;}
   if(senha.length<6){errEl.textContent='Senha deve ter pelo menos 6 caracteres.';errEl.style.display='block';return;}
   const chave = emailParaChave(email);
-  if(CORRETORES[chave]){errEl.textContent='Este e-mail já está cadastrado.';errEl.style.display='block';return;}
 
-  CORRETORES[chave]={nome,creci,wpp,email,senha:hashSenha(senha),status:'pendente',ts:Date.now()};
-  saveCorretores();
+  // Consultar Firebase diretamente para evitar falso positivo de cache
+  const btnConfirm = document.querySelector('#cad-panel-cadastro .cad-btn');
+  if(btnConfirm){ btnConfirm.disabled=true; btnConfirm.textContent='Verificando...'; }
 
-  // Notificar admin (toast especial)
-  sucEl.textContent='✅ Cadastro enviado! Aguarde a aprovação do administrador.';
-  sucEl.style.display='block';
-  document.getElementById('cc-nome').value='';
-  document.getElementById('cc-creci').value='';
-  document.getElementById('cc-wpp').value='';
-  document.getElementById('cc-email').value='';
-  document.getElementById('cc-senha').value='';
-
-  // Se admin online, mostrar notificação
-  if(isAdmin){showToast('🔔 Novo cadastro de corretor aguardando aprovação!');}
+  const verificar = refCORR ? refCORR.child(chave).get() : Promise.resolve({val:()=>null});
+  verificar.then(snap => {
+    if(btnConfirm){ btnConfirm.disabled=false; btnConfirm.textContent='Solicitar Cadastro'; }
+    if(snap.val()){
+      errEl.textContent='Este e-mail já está cadastrado.';
+      errEl.style.display='block';
+      return;
+    }
+    // Gravar direto no Firebase sem passar pela variável local
+    const novoCorretor = {nome,creci,wpp,email,senha:hashSenha(senha),status:'pendente',ts:Date.now()};
+    const gravar = refCORR ? refCORR.child(chave).set(novoCorretor) : Promise.resolve();
+    gravar.then(()=>{
+      sucEl.textContent='✅ Cadastro enviado! Aguarde a aprovação do administrador.';
+      sucEl.style.display='block';
+      document.getElementById('cc-nome').value='';
+      document.getElementById('cc-creci').value='';
+      document.getElementById('cc-wpp').value='';
+      document.getElementById('cc-email').value='';
+      document.getElementById('cc-senha').value='';
+      if(isAdmin) showToast('🔔 Novo cadastro de corretor aguardando aprovação!');
+    }).catch(e=>{
+      errEl.textContent='Erro ao salvar. Verifique sua conexão e tente novamente.';
+      errEl.style.display='block';
+      console.error('Erro Firebase cadastro:', e);
+    });
+  }).catch(e=>{
+    if(btnConfirm){ btnConfirm.disabled=false; btnConfirm.textContent='Solicitar Cadastro'; }
+    // Se Firebase falhou, tenta pela variável local como fallback
+    if(CORRETORES[chave]){
+      errEl.textContent='Este e-mail já está cadastrado.';
+      errEl.style.display='block';
+      return;
+    }
+    CORRETORES[chave]={nome,creci,wpp,email,senha:hashSenha(senha),status:'pendente',ts:Date.now()};
+    saveCorretores();
+    sucEl.textContent='✅ Cadastro enviado! Aguarde a aprovação do administrador.';
+    sucEl.style.display='block';
+  });
 }
 
 /* ── Login de corretor ── */
