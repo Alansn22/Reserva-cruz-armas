@@ -3,12 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0F1A14">
 <title>Reserva Cruz das Armas – Tabela de Vendas</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--gold:#C9A84C;--gold-light:#E8C96A;--dark:#0F1A14;--dark2:#162019;--green-deep:#1A3024;--cream:#F5F0E8;--avail:#3DBE7A;--reserved:#E8A020;--sold:#E05050;--text-light:#C8D4CC;}
+:root{color-scheme:dark;--gold:#C9A84C;--gold-light:#E8C96A;--dark:#0F1A14;--dark2:#162019;--green-deep:#1A3024;--cream:#F5F0E8;--avail:#3DBE7A;--reserved:#E8A020;--sold:#E05050;--text-light:#C8D4CC;}
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--dark);color:var(--cream);font-family:'DM Sans',sans-serif;min-height:100vh;}
+body{background:#0F1A14 !important;color:#F5F0E8 !important;font-family:'DM Sans',sans-serif;min-height:100vh;}
 .hero{background:linear-gradient(160deg,var(--dark2) 0%,var(--green-deep) 60%,#0a1510 100%);padding:48px 24px 36px;text-align:center;position:relative;border-bottom:1px solid rgba(201,168,76,0.2);}
 .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(201,168,76,0.08) 0%,transparent 70%);pointer-events:none;}
 .hero-badge{display:inline-block;font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--gold);border:1px solid rgba(201,168,76,0.4);padding:5px 16px;border-radius:20px;margin-bottom:16px;}
@@ -41,7 +43,7 @@ body{background:var(--dark);color:var(--cream);font-family:'DM Sans',sans-serif;
 .filter-btn{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text-light);font-family:'DM Sans',sans-serif;font-size:12px;padding:6px 14px;border-radius:20px;cursor:pointer;transition:all 0.2s;}
 .filter-btn:hover{border-color:var(--gold);color:var(--gold);}.filter-btn.active{background:var(--gold);border-color:var(--gold);color:var(--dark);font-weight:600;}
 .main{max-width:1100px;margin:8px auto;padding:0 16px 80px;}
-.bloco-section{margin-bottom:24px;background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.06);border-radius:16px;overflow:hidden;}
+.bloco-section{margin-bottom:24px;background:#0F1A14;border:1px solid rgba(201,168,76,0.15);border-radius:16px;overflow:hidden;}
 .bloco-header{background:linear-gradient(90deg,var(--green-deep),var(--dark2));padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(201,168,76,0.15);cursor:pointer;user-select:none;}
 .bloco-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--gold);display:flex;align-items:center;gap:10px;}
 .bloco-icon{width:28px;height:28px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;}
@@ -51,12 +53,12 @@ body{background:var(--dark);color:var(--cream);font-family:'DM Sans',sans-serif;
 
 .bloco-toggle{color:var(--gold);font-size:18px;transition:transform 0.3s;margin-left:6px;}
 .bloco-section.collapsed .bloco-toggle{transform:rotate(-90deg);}
-.bloco-body{padding:16px;}
+.bloco-body{padding:16px;background:#111D16;}
 .bloco-section.collapsed .bloco-body{display:none;}
 .pav-row{margin-bottom:16px;}
 .pav-label{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--gold);font-weight:600;margin-bottom:8px;padding-left:4px;opacity:0.8;}
 .apts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;}
-.apt-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:10px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;}
+.apt-card{background:#1A2E20;border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:10px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;}
 .apt-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
 .apt-card.disponivel::before{background:var(--avail);}.apt-card.reservado::before{background:var(--reserved);}.apt-card.reservado_pendente::before{background:#E8A020;}.apt-card.reservado_confirmado::before{background:#4A90D9;}.apt-card.vendido::before{background:var(--sold);}
 .apt-card:hover{transform:translateY(-2px);border-color:rgba(201,168,76,0.3);}
@@ -64,7 +66,7 @@ body{background:var(--dark);color:var(--cream);font-family:'DM Sans',sans-serif;
 .admin-mode .apt-card:hover{border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,168,76,0.3);}
 .admin-mode .apt-card::after{content:'✏️';position:absolute;top:6px;right:6px;font-size:10px;opacity:0;transition:opacity 0.2s;}
 .admin-mode .apt-card:hover::after{opacity:1;}
-.apt-num{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--cream);margin-bottom:2px;}
+.apt-num{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:#FFFFFF !important;margin-bottom:3px;}
 .apt-meta{display:flex;align-items:center;gap:5px;margin-bottom:3px;}
 .apt-area{font-size:10px;color:var(--text-light);}
 .solar-badge{font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;}
@@ -578,28 +580,8 @@ const DEF_RV={};
 // DEF_RV: {aptKey: {nome,cpf,corretor,creci,situacao,ts,status}}
 
 // ══════════════════════════════════════════════════════════════
-// FIREBASE — inicializa após SDK carregar
+// VARIÁVEIS GLOBAIS — acessíveis por todas as funções
 // ══════════════════════════════════════════════════════════════
-function initFirebase(){
-const firebaseConfig = {
-  apiKey: "AIzaSyDRJE9JqvW1dzwdTK3G83uf0B__qUKND_I",
-  authDomain: "reserva-cruz-armas.firebaseapp.com",
-  databaseURL: "https://reserva-cruz-armas-default-rtdb.firebaseio.com",
-  projectId: "reserva-cruz-armas",
-  storageBucket: "reserva-cruz-armas.firebasestorage.app",
-  messagingSenderId: "965116520536",
-  appId: "1:965116520536:web:1a9371d38c08d992dec22d"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-// Refs no banco
-const refST      = db.ref('rca/st');
-const refRV      = db.ref('rca/rv');
-const refCORR    = db.ref('rca/corretores');
-
-// ── State — preços/áreas/orientações sempre do código (nunca do banco)
-// ── Status, reservas e corretores vêm do Firebase em tempo real
 let ST    = {...DEF_ST};
 let RV    = {...DEF_RV};
 let PR    = {...DEF_PR};
@@ -607,60 +589,91 @@ let AR    = {...DEF_AR};
 let SO    = {...DEF_SO};
 let PLANS = {...DEFAULT_PLANS};
 
-// Indicador de conexão
-let fbConectado = false;
-function setConStatus(on){
-  fbConectado = on;
-  const el = document.getElementById('fb-status');
-  if(el){ el.textContent = on ? '🟢 Online' : '🔴 Offline'; el.style.color = on ? 'var(--avail)' : 'var(--sold)'; }
-}
-db.ref('.info/connected').on('value', s => setConStatus(s.val()===true));
-
-// Listener em tempo real — STATUS
-refST.on('value', snap => {
-  const val = snap.val();
-  if(val){ ST = {...DEF_ST, ...val}; } else { ST = {...DEF_ST}; }
-  render();
-});
-
-// Listener em tempo real — RESERVAS
-refRV.on('value', snap => {
-  const val = snap.val();
-  RV = val ? val : {};
-  verificarExpiradas();
-  render();
-  if(isAdmin) checkPendentesCorretor();
-});
-
-// Listener em tempo real — CORRETORES
-refCORR.on('value', snap => {
-  const val = snap.val();
-  CORRETORES = val ? val : {};
-  if(isAdmin){ checkPendentesCorretor(); }
-});
-} // fim initFirebase
-
-// Aguarda SDK do Firebase estar disponível
-function aguardarFirebase(tentativas){
-  if(typeof firebase !== 'undefined' && firebase.database){
-    initFirebase();
-  } else if(tentativas > 0){
-    setTimeout(()=>aguardarFirebase(tentativas-1), 200);
-  } else {
-    console.error('Firebase SDK não carregou. Verifique conexão.');
-    document.getElementById('fb-status').textContent = '🔴 Erro SDK';
-  }
-}
-document.addEventListener('DOMContentLoaded', ()=>aguardarFirebase(20));
-
 let isAdmin=false, curFilter='todos', curApt=null, curBloco='A';
 let editNewStatus=null, editNewPlanta=null;
+let fbConectado = false;
 
+// Refs Firebase (globais, inicializadas após SDK carregar)
+let db, refST, refRV, refCORR;
+
+// ══════════════════════════════════════════════════════════════
+// FIREBASE — conecta e registra listeners em tempo real
+// ══════════════════════════════════════════════════════════════
+function initFirebase(){
+  try {
+    const firebaseConfig = {
+      apiKey: "AIzaSyDRJE9JqvW1dzwdTK3G83uf0B__qUKND_I",
+      authDomain: "reserva-cruz-armas.firebaseapp.com",
+      databaseURL: "https://reserva-cruz-armas-default-rtdb.firebaseio.com",
+      projectId: "reserva-cruz-armas",
+      storageBucket: "reserva-cruz-armas.firebasestorage.app",
+      messagingSenderId: "965116520536",
+      appId: "1:965116520536:web:1a9371d38c08d992dec22d"
+    };
+    if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    db    = firebase.database();
+    refST   = db.ref('rca/st');
+    refRV   = db.ref('rca/rv');
+    refCORR = db.ref('rca/corretores');
+
+    // Indicador de conexão
+    db.ref('.info/connected').on('value', s => {
+      fbConectado = s.val()===true;
+      const el = document.getElementById('fb-status');
+      if(el){ el.textContent = fbConectado ? '🟢 Online' : '🔴 Offline'; el.style.color = fbConectado ? 'var(--avail)' : 'var(--sold)'; }
+    });
+
+    // Listener STATUS — atualiza toda vez que alguém mudar no banco
+    refST.on('value', snap => {
+      const val = snap.val();
+      ST = val ? {...DEF_ST, ...val} : {...DEF_ST};
+      render();
+    });
+
+    // Listener RESERVAS
+    refRV.on('value', snap => {
+      RV = snap.val() || {};
+      verificarExpiradas();
+      render();
+      if(isAdmin) checkPendentesCorretor();
+    });
+
+    // Listener CORRETORES
+    refCORR.on('value', snap => {
+      CORRETORES = snap.val() || {};
+      if(isAdmin) checkPendentesCorretor();
+    });
+
+  } catch(e) {
+    console.error('Erro ao inicializar Firebase:', e);
+    const el = document.getElementById('fb-status');
+    if(el) el.textContent = '🔴 Erro';
+    // Mesmo sem Firebase, renderiza com dados padrão
+    render();
+  }
+}
+
+// Tenta conectar ao Firebase; renderiza a página independentemente
+function aguardarFirebase(n){
+  if(typeof firebase !== 'undefined' && firebase.database){
+    initFirebase();
+  } else if(n > 0){
+    setTimeout(()=>aguardarFirebase(n-1), 200);
+  } else {
+    console.warn('Firebase SDK não carregou — modo offline');
+    const el = document.getElementById('fb-status');
+    if(el) el.textContent = '🔴 Offline';
+    render(); // renderiza com DEF_ST mesmo assim
+  }
+}
+document.addEventListener('DOMContentLoaded', ()=>{ render(); aguardarFirebase(15); });
+
+// ══════════════════════════════════════════════════════════════
+// SAVE — grava no Firebase (ou ignora se offline)
+// ══════════════════════════════════════════════════════════════
 function save(){
-  // Só grava status e reservas no Firebase
-  // Preços, áreas e orientações são sempre do código
-  refST.set(ST).catch(e=>console.error('Firebase ST:',e));
-  refRV.set(RV).catch(e=>console.error('Firebase RV:',e));
+  if(refST) refST.set(ST).catch(e=>console.error('Firebase ST:',e));
+  if(refRV) refRV.set(RV).catch(e=>console.error('Firebase RV:',e));
 }
 
 function fmt(v){return 'R$ '+Math.round(v).toLocaleString('pt-BR');}
@@ -707,10 +720,11 @@ function render(){
         const st=ST[apt.n],sc=SC[SO[apt.n]]||'?';
         const card=document.createElement('div');
         card.className=`apt-card ${st}`;
+        const stLabel={disponivel:'✓ Disponível',reservado:'⏳ Reservado',reservado_pendente:'⏳ Res. Pendente',reservado_confirmado:'📋 Confirmado',vendido:'✕ Vendido'}[st]||'✓ Disponível';
         card.innerHTML=`<div class="apt-num">${apt.n}</div>
           <div class="apt-meta"><span class="apt-area">${AR[apt.n]}m²</span><span class="solar-badge solar-${sc}">${sc}</span></div>
           <div class="apt-price">${fmt(PR[apt.n])}</div>
-          <div class="apt-status">${st==='disponivel'?'✓ Disponível':st==='reservado'?'⏳ Reservado':'✕ Vendido'}</div>`;
+          <div class="apt-status">${stLabel}</div>`;
         card.onclick=()=>openApt(apt,bloco,pi+1);
         grid.appendChild(card);
       });
