@@ -252,11 +252,15 @@ body{background:var(--dark);color:var(--cream);font-family:'DM Sans',sans-serif;
 .vagas-aviso strong{color:var(--cream);}
 
 </style>
+<!-- Firebase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.0/firebase-app-compat.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.0/firebase-database-compat.min.js"></script>
 </head>
 <body>
 
 <div class="hero">
   <div class="hero-badge">🏡 Lançamento Oficial</div>
+  <div style="position:absolute;top:12px;right:16px;font-size:11px;font-weight:600;" id="fb-status">⏳ Conectando...</div>
   <h1>Reserva <span>Cruz das Armas</span></h1>
   <p class="hero-sub">5 Blocos · 4 Pavimentos · 169 Apartamentos · João Pessoa – PB</p>
   <div class="vagas-aviso">
@@ -573,37 +577,90 @@ const DEF_SO={"101A": "Leste", "102A": "Leste/Norte", "103A": "Norte", "104A": "
 const DEF_RV={};
 // DEF_RV: {aptKey: {nome,cpf,corretor,creci,situacao,ts,status}}
 
-// ── Controle de versão de dados ──────────────────────────────────────────────
-// Sempre que atualizar preços, áreas ou orientações no código,
-// mude o DATA_VERSION abaixo. Os status de vendas e reservas são PRESERVADOS.
-const DATA_VERSION = '2025-07-08-v1';
-if (localStorage.getItem('rca_data_version') !== DATA_VERSION) {
-  localStorage.removeItem('rca_pr');
-  localStorage.removeItem('rca_ar');
-  localStorage.removeItem('rca_so');
-  localStorage.removeItem('rca_plans');
-  localStorage.setItem('rca_data_version', DATA_VERSION);
-}
-// ─────────────────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+// FIREBASE — inicializa após SDK carregar
+// ══════════════════════════════════════════════════════════════
+function initFirebase(){
+const firebaseConfig = {
+  apiKey: "AIzaSyDRJE9JqvW1dzwdTK3G83uf0B__qUKND_I",
+  authDomain: "reserva-cruz-armas.firebaseapp.com",
+  databaseURL: "https://reserva-cruz-armas-default-rtdb.firebaseio.com",
+  projectId: "reserva-cruz-armas",
+  storageBucket: "reserva-cruz-armas.firebasestorage.app",
+  messagingSenderId: "965116520536",
+  appId: "1:965116520536:web:1a9371d38c08d992dec22d"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-// State — load from localStorage or defaults
-let ST=JSON.parse(localStorage.getItem('rca_st')||'null')||{...DEF_ST};
-let RV=JSON.parse(localStorage.getItem('rca_rv')||'null')||{...DEF_RV};
-let PR=JSON.parse(localStorage.getItem('rca_pr')||'null')||{...DEF_PR};
-let AR=JSON.parse(localStorage.getItem('rca_ar')||'null')||{...DEF_AR};
-let SO=JSON.parse(localStorage.getItem('rca_so')||'null')||{...DEF_SO};
-let PLANS=JSON.parse(localStorage.getItem('rca_plans')||'null')||{...DEFAULT_PLANS};
+// Refs no banco
+const refST      = db.ref('rca/st');
+const refRV      = db.ref('rca/rv');
+const refCORR    = db.ref('rca/corretores');
+
+// ── State — preços/áreas/orientações sempre do código (nunca do banco)
+// ── Status, reservas e corretores vêm do Firebase em tempo real
+let ST    = {...DEF_ST};
+let RV    = {...DEF_RV};
+let PR    = {...DEF_PR};
+let AR    = {...DEF_AR};
+let SO    = {...DEF_SO};
+let PLANS = {...DEFAULT_PLANS};
+
+// Indicador de conexão
+let fbConectado = false;
+function setConStatus(on){
+  fbConectado = on;
+  const el = document.getElementById('fb-status');
+  if(el){ el.textContent = on ? '🟢 Online' : '🔴 Offline'; el.style.color = on ? 'var(--avail)' : 'var(--sold)'; }
+}
+db.ref('.info/connected').on('value', s => setConStatus(s.val()===true));
+
+// Listener em tempo real — STATUS
+refST.on('value', snap => {
+  const val = snap.val();
+  if(val){ ST = {...DEF_ST, ...val}; } else { ST = {...DEF_ST}; }
+  render();
+});
+
+// Listener em tempo real — RESERVAS
+refRV.on('value', snap => {
+  const val = snap.val();
+  RV = val ? val : {};
+  verificarExpiradas();
+  render();
+  if(isAdmin) checkPendentesCorretor();
+});
+
+// Listener em tempo real — CORRETORES
+refCORR.on('value', snap => {
+  const val = snap.val();
+  CORRETORES = val ? val : {};
+  if(isAdmin){ checkPendentesCorretor(); }
+});
+} // fim initFirebase
+
+// Aguarda SDK do Firebase estar disponível
+function aguardarFirebase(tentativas){
+  if(typeof firebase !== 'undefined' && firebase.database){
+    initFirebase();
+  } else if(tentativas > 0){
+    setTimeout(()=>aguardarFirebase(tentativas-1), 200);
+  } else {
+    console.error('Firebase SDK não carregou. Verifique conexão.');
+    document.getElementById('fb-status').textContent = '🔴 Erro SDK';
+  }
+}
+document.addEventListener('DOMContentLoaded', ()=>aguardarFirebase(20));
 
 let isAdmin=false, curFilter='todos', curApt=null, curBloco='A';
 let editNewStatus=null, editNewPlanta=null;
 
 function save(){
-  localStorage.setItem('rca_st',JSON.stringify(ST));
-  localStorage.setItem('rca_rv',JSON.stringify(RV));
-  localStorage.setItem('rca_pr',JSON.stringify(PR));
-  localStorage.setItem('rca_ar',JSON.stringify(AR));
-  localStorage.setItem('rca_so',JSON.stringify(SO));
-  localStorage.setItem('rca_plans',JSON.stringify(PLANS));
+  // Só grava status e reservas no Firebase
+  // Preços, áreas e orientações são sempre do código
+  refST.set(ST).catch(e=>console.error('Firebase ST:',e));
+  refRV.set(RV).catch(e=>console.error('Firebase RV:',e));
 }
 
 function fmt(v){return 'R$ '+Math.round(v).toLocaleString('pt-BR');}
@@ -969,7 +1026,16 @@ function tryLogin(){
   }else{document.getElementById('login-err').style.display='block';document.getElementById('login-in').value='';document.getElementById('login-in').focus();}
 }
 function doLogout(){isAdmin=false;document.getElementById('admin-bar').classList.add('hidden');document.getElementById('admin-float').style.display='block';render();}
-function openExport(){document.getElementById('exp-json').value=JSON.stringify({ST,PR,AR,SO},null,2);document.getElementById('export-ov').classList.add('open');}
+function openExport(){
+  const resumo={
+    'Status por apartamento': Object.entries(ST).filter(([,v])=>v!=='disponivel').length+' alterados',
+    'Reservas ativas': Object.keys(RV).length,
+    'Corretores cadastrados': Object.keys(CORRETORES).length,
+  };
+  document.getElementById('exp-json').value=JSON.stringify(resumo,null,2)+
+    '\n\n// Dados completos em:\n// console.firebase.google.com → Realtime Database';
+  document.getElementById('export-ov').classList.add('open');
+}
 function closeExport(e){if(!e||e.target===document.getElementById('export-ov'))document.getElementById('export-ov').classList.remove('open');}
 function copyTA(id){const el=document.getElementById(id);el.select();document.execCommand('copy');showToast('📋 Copiado!');}
 function downloadHTML(){
@@ -997,11 +1063,12 @@ render();
    status: 'pendente' | 'aprovado' | 'bloqueado'
    ============================================================ */
 
-let CORRETORES = JSON.parse(localStorage.getItem('rca_corretores')||'null')||{};
+// CORRETORES e sessão — gerenciados pelo Firebase + localStorage (sessão local)
+let CORRETORES = {};
 let corretorLogado = JSON.parse(localStorage.getItem('rca_corretor_session')||'null');
 
 function saveCorretores(){
-  localStorage.setItem('rca_corretores', JSON.stringify(CORRETORES));
+  refCORR.set(CORRETORES).catch(e=>console.error('Firebase CORR:',e));
 }
 
 // Hash simples (não criptográfico — suficiente para uso local)
