@@ -1094,8 +1094,8 @@ function hashSenha(s){
 /* ── UI inicial ── */
 function initCorretorUI(){
   const btn = document.getElementById('corretor-float');
-  if(corretorLogado && CORRETORES[corretorLogado.email] &&
-     CORRETORES[corretorLogado.email].status==='aprovado'){
+  if(corretorLogado && CORRETORES[emailParaChave(corretorLogado.email)] &&
+     CORRETORES[emailParaChave(corretorLogado.email)].status==='aprovado'){
     btn.textContent = '👤 '+corretorLogado.nome.split(' ')[0];
     btn.classList.add('logado');
   } else {
@@ -1142,6 +1142,15 @@ function switchCadTab(tab){
 }
 
 /* ── Cadastro de corretor ── */
+
+function emailParaChave(email){
+  // Firebase não aceita '.', '#', '$', '[', ']' em chaves
+  return email.replace(/\./g,'_').replace(/@/g,'__at__');
+}
+function chaveParaEmail(chave){
+  return chave.replace(/__at__/g,'@').replace(/_/g,'.');
+}
+
 function doCadastroCorretor(){
   const nome  = document.getElementById('cc-nome').value.trim();
   const creci = document.getElementById('cc-creci').value.trim();
@@ -1156,9 +1165,10 @@ function doCadastroCorretor(){
   if(!creci){errEl.textContent='Informe seu CRECI.';errEl.style.display='block';return;}
   if(!email||!email.includes('@')){errEl.textContent='E-mail inválido.';errEl.style.display='block';return;}
   if(senha.length<6){errEl.textContent='Senha deve ter pelo menos 6 caracteres.';errEl.style.display='block';return;}
-  if(CORRETORES[email]){errEl.textContent='Este e-mail já está cadastrado.';errEl.style.display='block';return;}
+  const chave = emailParaChave(email);
+  if(CORRETORES[chave]){errEl.textContent='Este e-mail já está cadastrado.';errEl.style.display='block';return;}
 
-  CORRETORES[email]={nome,creci,wpp,email,senha:hashSenha(senha),status:'pendente',ts:Date.now()};
+  CORRETORES[chave]={nome,creci,wpp,email,senha:hashSenha(senha),status:'pendente',ts:Date.now()};
   saveCorretores();
 
   // Notificar admin (toast especial)
@@ -1183,7 +1193,7 @@ function doCorretorLogin(){
   const pendEl= document.getElementById('cad-pendente');
   errEl.style.display='none'; sucEl.style.display='none'; pendEl.style.display='none';
 
-  const c = CORRETORES[email];
+  const c = CORRETORES[emailParaChave(email)];
   if(!c || c.senha!==hashSenha(senha)){
     errEl.textContent='E-mail ou senha incorretos.';
     errEl.style.display='block';
@@ -1219,32 +1229,33 @@ function closeAdmCorr(e){
 
 function renderCorrList(){
   const body = document.getElementById('corr-list-body');
-  const list = Object.values(CORRETORES);
-  if(!list.length){
+  const entries = Object.entries(CORRETORES);
+  if(!entries.length){
     body.innerHTML='<div class="corr-empty">Nenhum corretor cadastrado ainda.</div>';
     return;
   }
   // Ordenar: pendente primeiro
-  list.sort((a,b)=>{
+  entries.sort(([,a],[,b])=>{
     const ord={pendente:0,aprovado:1,bloqueado:2};
     return (ord[a.status]||1)-(ord[b.status]||1);
   });
-  body.innerHTML = list.map(c=>{
+  const list = entries;
+  body.innerHTML = list.map(([chave,c])=>{
     const badge={pendente:'pendente',aprovado:'aprovado',bloqueado:'bloqueado'}[c.status];
     const lbl={pendente:'⏳ Pendente',aprovado:'✅ Aprovado',bloqueado:'🚫 Bloqueado'}[c.status];
-    // Contar reservas ativas
     const ativas = Object.values(RV).filter(r=>r.corretor_id===c.creci&&(r.status==='pendente'||r.status==='confirmado')).length;
     const resBadge = ativas>0?` · <span style="color:#E8A020">${ativas} reserva(s) ativa(s)</span>`:'';
+    const emailDisplay = c.email || chaveParaEmail(chave);
     return `<div class="corr-item">
       <div class="corr-info">
         <div class="corr-nome">${c.nome} <span class="corr-badge ${badge}">${lbl}</span></div>
-        <div class="corr-detalhe">CRECI: ${c.creci} · ${c.email}${resBadge}</div>
+        <div class="corr-detalhe">CRECI: ${c.creci} · ${emailDisplay}${resBadge}</div>
         ${c.wpp?`<div class="corr-detalhe">📱 ${c.wpp}</div>`:''}
       </div>
       <div class="corr-actions">
-        ${c.status!=='aprovado'?`<button class="corr-btn aprovar" onclick="admAprovar('${c.email}')">Aprovar</button>`:''}
-        ${c.status!=='bloqueado'?`<button class="corr-btn bloquear" onclick="admBloquear('${c.email}')">Bloquear</button>`:''}
-        <button class="corr-btn remover" onclick="admRemover('${c.email}')">Remover</button>
+        ${c.status!=='aprovado'?`<button class="corr-btn aprovar" onclick="admAprovar('${chave}')">Aprovar</button>`:''}
+        ${c.status!=='bloqueado'?`<button class="corr-btn bloquear" onclick="admBloquear('${chave}')">Bloquear</button>`:''}
+        <button class="corr-btn remover" onclick="admRemover('${chave}')">Remover</button>
       </div>
     </div>`;
   }).join('');
@@ -1262,18 +1273,18 @@ function admBloquear(email){
   if(!confirm(`Bloquear ${CORRETORES[email].nome}?`))return;
   CORRETORES[email].status='bloqueado';
   // Limpar sessão se estiver logado
-  if(corretorLogado&&corretorLogado.email===email){
+  if(corretorLogado&&emailParaChave(corretorLogado.email)===email){
     corretorLogado=null;localStorage.removeItem('rca_corretor_session');initCorretorUI();
   }
   saveCorretores();
   renderCorrList();
-  showToast(`🚫 Corretor bloqueado.`);
+  showToast('🚫 Corretor bloqueado.');
 }
 function admRemover(email){
   if(!CORRETORES[email])return;
   if(!confirm(`Remover ${CORRETORES[email].nome} permanentemente?`))return;
   delete CORRETORES[email];
-  if(corretorLogado&&corretorLogado.email===email){
+  if(corretorLogado&&emailParaChave(corretorLogado.email)===email){
     corretorLogado=null;localStorage.removeItem('rca_corretor_session');initCorretorUI();
   }
   saveCorretores();
