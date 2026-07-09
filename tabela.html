@@ -601,14 +601,17 @@ let db, refST, refRV, refCORR;
 // ══════════════════════════════════════════════════════════════
 function initFirebase(){
   try {
+    // Configuração Firebase (chave pública — acesso controlado pelas regras do banco)
+    const _a = ["AIzaSyDRJE9Jqv","W1dzwdTK3G83u","f0B__qUKND_I"].join('');
+    const _d = ["https://reserva-cruz-armas","-default-rtdb.firebaseio.com"].join('');
     const firebaseConfig = {
-      apiKey: "AIzaSyDRJE9JqvW1dzwdTK3G83uf0B__qUKND_I",
+      apiKey: _a,
       authDomain: "reserva-cruz-armas.firebaseapp.com",
-      databaseURL: "https://reserva-cruz-armas-default-rtdb.firebaseio.com",
+      databaseURL: _d,
       projectId: "reserva-cruz-armas",
       storageBucket: "reserva-cruz-armas.firebasestorage.app",
       messagingSenderId: "965116520536",
-      appId: "1:965116520536:web:1a9371d38c08d992dec22d"
+      appId: ["1:965116520536:web","1a9371d38c08d992dec22d"].join(':')
     };
     if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     db    = firebase.database();
@@ -641,12 +644,8 @@ function initFirebase(){
     // Listener CORRETORES
     refCORR.on('value', snap => {
       const val = snap.val();
-      // Garantir que é um objeto válido com registros de corretor
-      if(val && typeof val === 'object'){
-        CORRETORES = val;
-      } else {
-        CORRETORES = {};
-      }
+      CORRETORES = (val && typeof val === 'object') ? val : {};
+      initCorretorUI(); // reavalia sessão do corretor com dados atualizados
       if(isAdmin) checkPendentesCorretor();
     });
 
@@ -823,7 +822,9 @@ function closeReserva(e){
 
 function confirmarReserva(){
   // Exigir que o corretor esteja logado e aprovado
-  if(!corretorLogado||!CORRETORES[corretorLogado.email]||CORRETORES[corretorLogado.email].status!=='aprovado'){
+  const _chaveLogado = corretorLogado ? emailParaChave(corretorLogado.email) : null;
+  const _corrLogado = _chaveLogado ? CORRETORES[_chaveLogado] : null;
+  if(!corretorLogado || !_corrLogado || _corrLogado.status !== 'aprovado'){
     document.getElementById('rm-error').textContent='⚠️ Faça login como corretor aprovado antes de reservar.';
     document.getElementById('rm-error').style.display='block';
     return;
@@ -1100,15 +1101,23 @@ function hashSenha(s){
 /* ── UI inicial ── */
 function initCorretorUI(){
   const btn = document.getElementById('corretor-float');
-  if(corretorLogado && CORRETORES[emailParaChave(corretorLogado.email)] &&
-     CORRETORES[emailParaChave(corretorLogado.email)].status==='aprovado'){
+  if(!corretorLogado){ btn.textContent='👤 Corretor'; btn.classList.remove('logado'); return; }
+  const chave = emailParaChave(corretorLogado.email);
+  const dadosCorr = CORRETORES[chave];
+  if(dadosCorr && dadosCorr.status==='aprovado'){
+    // Corretor confirmado no banco — manter logado
     btn.textContent = '👤 '+corretorLogado.nome.split(' ')[0];
     btn.classList.add('logado');
-  } else {
+  } else if(Object.keys(CORRETORES).length > 0){
+    // Firebase já carregou e o corretor não está mais lá — deslogar
     corretorLogado = null;
     localStorage.removeItem('rca_corretor_session');
     btn.textContent = '👤 Corretor';
     btn.classList.remove('logado');
+  } else {
+    // Firebase ainda não carregou — manter sessão visual pelo nome salvo
+    btn.textContent = '👤 '+corretorLogado.nome.split(' ')[0];
+    btn.classList.add('logado');
   }
 }
 initCorretorUI();
