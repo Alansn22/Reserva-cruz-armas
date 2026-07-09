@@ -822,10 +822,16 @@ function closeReserva(e){
 
 function confirmarReserva(){
   // Exigir que o corretor esteja logado e aprovado
-  const _chaveLogado = corretorLogado ? emailParaChave(corretorLogado.email) : null;
-  const _corrLogado = _chaveLogado ? CORRETORES[_chaveLogado] : null;
-  if(!corretorLogado || !_corrLogado || _corrLogado.status !== 'aprovado'){
-    document.getElementById('rm-error').textContent='⚠️ Faça login como corretor aprovado antes de reservar.';
+  // Verificar sessão — não depende do Firebase estar carregado
+  if(!corretorLogado){
+    document.getElementById('rm-error').textContent='⚠️ Faça login como corretor antes de reservar.';
+    document.getElementById('rm-error').style.display='block';
+    return;
+  }
+  // Verificação adicional no Firebase se já carregou
+  const _chave = emailParaChave(corretorLogado.email);
+  if(Object.keys(CORRETORES).length > 0 && (!CORRETORES[_chave] || CORRETORES[_chave].status !== 'aprovado')){
+    document.getElementById('rm-error').textContent='⚠️ Sua conta de corretor não está aprovada.';
     document.getElementById('rm-error').style.display='block';
     return;
   }
@@ -937,7 +943,7 @@ function openApt(apt,bloco,pav){
   if(st==='disponivel'){
     const msg=encodeURIComponent(`Olá! Tenho interesse no Apartamento ${apt.n} – Bloco ${bloco}\nReserva Cruz das Armas\n${PAV[pav-1]} · ${AR[apt.n]}m² · ${SO[apt.n]}\nValor: ${fmt(PR[apt.n])}\nAguardo retorno!`);
     wpp.href=`https://wa.me/${WPP}?text=${msg}`;wpp.className='btn-wpp';wpp.onclick=null;
-    if(!isAdmin){btnRes.style.display='block';}
+    btnRes.style.display='block';
   }else if(st==='reservado_pendente'||st==='reservado_confirmado'){
     wpp.href='#';wpp.className='btn-wpp disabled';wpp.onclick=e=>e.preventDefault();
     const rv=RV[apt.n];
