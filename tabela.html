@@ -333,7 +333,6 @@ body{background:#0F1A14 !important;color:#F5F0E8 !important;font-family:'DM Sans
       • CPF do cliente é obrigatório<br>
       • Reserva válida por <b>48 horas úteis</b><br>
       • Documentos devem ser enviados no prazo<br>
-      • Máx. <b>2 reservas</b> ativas por corretor<br>
       • Um CPF só pode ter <b>uma reserva ativa</b>
     </div>
     <div class="rm-error" id="rm-error"></div>
@@ -790,7 +789,6 @@ function doFilter(f,btn){curFilter=f;document.querySelectorAll('.filter-btn').fo
 /* ══════════════════════════════════════════════════════════
    SISTEMA DE RESERVAS — REGRAS
    ══════════════════════════════════════════════════════════ */
-const LIMITE_CORRETOR = 2;     // máx. reservas por corretor
 const PRAZO_HORAS = 48;        // horas para confirmar
 const PRAZO_MS = PRAZO_HORAS * 60 * 60 * 1000;
 
@@ -905,14 +903,6 @@ function confirmarReserva(){
     r.cpf===cpfLimpo && k!==aptKey && (r.status==='pendente'||r.status==='confirmado')
   );
   if(cpfDup){showErr('⚠️ Este CPF já possui uma reserva ativa em outro apartamento.');return;}
-
-  // Verificar limite por corretor
-  const ativas=Object.values(RV).filter(r=>
-    r.corretor_id===creci && (r.status==='pendente'||r.status==='confirmado')
-  );
-  if(ativas.length>=LIMITE_CORRETOR){
-    showErr(`⚠️ Corretor já possui ${LIMITE_CORRETOR} reservas ativas. Aguarde a conclusão de uma delas.`);return;
-  }
 
   // Criar reserva
   RV[aptKey]={
